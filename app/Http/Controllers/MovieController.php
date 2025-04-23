@@ -4,24 +4,29 @@ namespace App\Http\Controllers;
 
 use App\Models\Movie;
 use App\Models\Category;
+use App\Services\MovieService;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 
+
 class MovieController extends Controller
 {
 
+    protected $movieService;
+
+    public function __construct(MovieService $movieService)
+    {
+        $this->movieService = $movieService;
+    }
+
     public function index()
     {
+        $searchTerm = request('search');
+        $movies = $this->movieService->getMoviesWithSearch($searchTerm);
 
-        $query = Movie::latest();
-        if (request('search')) {
-            $query->where('judul', 'like', '%' . request('search') . '%')
-                ->orWhere('sinopsis', 'like', '%' . request('search') . '%');
-        }
-        $movies = $query->paginate(6)->withQueryString();
         return view('homepage', compact('movies'));
     }
 
